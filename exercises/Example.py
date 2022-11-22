@@ -14,7 +14,7 @@ def second_greet():
     logging.info('Hello Data Scientists!')
 
 dag = DAG(
-    'session1.exercise1',
+    'session1.exercise32',
     schedule_interval='@hourly',
     start_date=datetime.datetime.now() - datetime.timedelta(days=1))
 
