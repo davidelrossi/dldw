@@ -1,7 +1,7 @@
 """
-This python module will obtain data from section elements_type
+This python module will obtain data from section teams
 of the bootstrap-static/ endpoint of the premier league API.
-This section contains basic information about player’s position (GK, DEF, MID, FWD)
+This section contains basic information of current Premier League clubs.
 
 """
 
@@ -20,7 +20,7 @@ response = requests.get(url)
 data = response.json()
 
 # Create DataFrame
-elements_types_df = pd.DataFrame(data['element_types'])
+teams_df = pd.DataFrame(data['teams'])
 
 # Connect to Data Lake
 host = "datalake1.clfypptwx2in.us-east-1.rds.amazonaws.com"
@@ -43,17 +43,20 @@ conn.set_session(autocommit=True)
 
 # Drop existing table
 try:
-    cur.execute("DROP TABLE IF EXISTS Elements_types;")
+    cur.execute("DROP TABLE IF EXISTS Teams;")
     print("Table deleted")
 
 except psycopg2.Error as e:
     print(f'Error: {e}')
 
-# Create Elements_types table
+# Create Teams table
 try:
-    sql = "CREATE TABLE IF NOT EXISTS Elements_types (id INT, plural_name VARCHAR(255), plural_name_short VARCHAR(255),\
-            singular_name VARCHAR(255), singular_name_short VARCHAR(255), squad_select INT, squad_min_play INT,\
-            squad_max_play INT, ui_shirt_specific VARCHAR(255), sub_positions_locked VARCHAR(255), element_count INT);"
+    sql = "CREATE TABLE IF NOT EXISTS Teams (code INT, draw INT, form VARCHAR(255),\
+            id INT, loss INT, name VARCHAR(255),\
+            played INT, points INT, position INT, short_name VARCHAR(255), strength INT, team_division VARCHAR(255),\
+            unavailable VARCHAR(255), win INT, strength_overall_home INT, strength_overall_away INT,\
+            strength_attack_home INT, strength_attack_away INT, strength_defence_home INT, strength_defence_away INT,\
+            pulse_id INT);"
     cur.execute(sql)
     print("Table created")
 
@@ -62,7 +65,7 @@ except psycopg2.Error as e:
 
 # Load data
 
-execute_values(conn, elements_types_df, 'Elements_types')
+execute_values(conn, teams_df, 'Teams')
 
 cur.close()
 conn.close()
