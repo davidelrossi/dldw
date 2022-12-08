@@ -125,4 +125,4 @@ load_data = PythonOperator(
 
 # ----------------------------- Trigger Tasks -----------------------------
 
-start_task >> convert_to_json >> load_data
+get_teams_url >> convert_to_json >> load_data
