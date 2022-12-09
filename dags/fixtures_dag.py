@@ -71,9 +71,9 @@ def get_fixtures(ti):
         if (counter % 50) == 0 or counter == len(ids_list):
             print(str(counter) + " players")
 
-        return fixtures_df
+    fixtures_list = fixtures_df.to_dict('records')
 
-
+    return fixtures_list
 
     # # Data Lake credentials
     # pg_hook = PostgresHook(
