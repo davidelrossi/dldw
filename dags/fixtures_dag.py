@@ -75,39 +75,48 @@ def get_fixtures(ti):
 
     return fixtures_list
 
-    # # Data Lake credentials
-    # pg_hook = PostgresHook(
-    #     postgres_conn_id='postgres_db'
-    # )
-    #
-    # # Drop existing table
-    # drop_table = "DROP TABLE IF EXISTS fixtures;"
-    #
-    # # Create new table
-    # create_table = "CREATE TABLE IF NOT EXISTS fixtures (id INT, code INT, team_h INT, team_h_score VARCHAR(255),\
-    # team_a INT, team_a_score VARCHAR(255), event FLOAT, finished VARCHAR(255), minutes INT,\
-    # provisional_start_time VARCHAR(255), kickoff_time VARCHAR(255), event_name VARCHAR(255), is_home VARCHAR(255),\
-    # difficulty INT);"
-    #
-    # # Connect to data lake
-    # pg_conn = pg_hook.get_conn()
-    # cursor = pg_conn.cursor()
-    #
-    # # Execute SQL statements
-    # cursor.execute(drop_table)
-    # cursor.execute(create_table)
-    #
-    # # Commit
-    # pg_conn.commit()
-    #
-    # # Create a list of tuples representing the rows in the dataframe
-    # rows = [tuple(x) for x in fixtures_df.values]
-    #
-    # # Insert the rows into the database
-    # pg_hook.insert_rows(table="fixtures", rows=rows)
+
+# 4. Load fixtures data into database
+def load_fixtures(ti):
+
+    # Get data returned from previous tasks'
+    data = ti.xcom_pull(task_ids=['get_fixtures'])
+    if not data:
+        raise ValueError('No value currently stored in XComs')
+
+    # Get data from nested list
+    fixtures_data = data[0]
+
+    # Data Lake credentials
+    pg_hook = PostgresHook(
+        postgres_conn_id='postgres_db'
+    )
+
+    # Drop existing table
+    drop_table = "DROP TABLE IF EXISTS fixtures;"
+
+    # Create new table
+    create_table = "CREATE TABLE IF NOT EXISTS fixtures (id INT, code INT, team_h INT, team_h_score VARCHAR(255),\
+    team_a INT, team_a_score VARCHAR(255), event FLOAT, finished VARCHAR(255), minutes INT,\
+    provisional_start_time VARCHAR(255), kickoff_time VARCHAR(255), event_name VARCHAR(255), is_home VARCHAR(255),\
+    difficulty INT);"
+
+    # Connect to data lake
+    pg_conn = pg_hook.get_conn()
+    cursor = pg_conn.cursor()
+
+    # Execute SQL statements
+    cursor.execute(drop_table)
+    cursor.execute(create_table)
+
+    # Commit
+    pg_conn.commit()
+
+    # Insert the rows into the database
+    pg_hook.insert_rows(table="fixtures", rows=fixtures_data)
 
 
-# 4. Log the end of the DAG
+# 5. Log the end of the DAG
 def finish_dag():
     logging.info('DAG HAS FINISHED,OBTAINED FIXTURES INFORMATION')
 
@@ -145,10 +154,18 @@ get_players_ids = PythonOperator(
 get_fixtures = PythonOperator(
     task_id="get_fixtures",
     python_callable=get_fixtures,
+    do_xcom_push=True,
     dag=dag
 )
 
-# 4. End Task
+# 3. Load data
+load_fixtures = PythonOperator(
+    task_id="load_fixtures",
+    python_callable=load_fixtures,
+    dag=dag
+)
+
+# 5. End Task
 end_task = PythonOperator(
     task_id="end_task",
     python_callable=finish_dag,
@@ -157,4 +174,4 @@ end_task = PythonOperator(
 
 # -------------------- Triggering tasks -------------------- #
 
-start_task >> get_players_ids >> get_fixtures >> end_task
+start_task >> get_players_ids >> get_fixtures >> load_fixtures >> end_task
