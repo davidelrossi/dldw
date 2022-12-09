@@ -52,13 +52,16 @@ def get_data():
     cursor.execute(drop_table)
     cursor.execute(create_table)
 
+    # Commit
+    pg_conn.commit()
+
     # Create a list of tuples representing the rows in the dataframe
     rows = [tuple(x) for x in teams_df.values]
 
     # Insert the rows into the database
     pg_hook.insert_rows(table="teams", rows=rows)
 
-    pg_conn.commit()
+
 
 
 # Create DAG
