@@ -7,6 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 
 # Libraries for FPL API
 import requests
+import pandas as pd
 
 # -------------------- Functions -------------------- #
 
@@ -30,7 +31,10 @@ def load_data(ti):
     if not data:
         raise ValueError('No value currently stored in XComs')
 
-    return data
+    # Create DataFrame
+    teams_df = pd.DataFrame(data['teams'])
+
+    return teams_df
 
 
 # Create DAG
