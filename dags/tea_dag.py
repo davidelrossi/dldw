@@ -35,7 +35,7 @@ def get_data():
         schema='fpl_api'
     )
 
-    hook.pandas_to_postgres(
+    pg_hook.pandas_to_postgres(
         dataframe=teams_df,
         table_name="teams",
         if_exists="replace"
