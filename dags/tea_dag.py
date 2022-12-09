@@ -26,7 +26,7 @@ def get_data():
 
 def load_data(ti):
     # get data returned from previous task
-    data = ti.xcom_pull(task_ids=['convert_to_json'])
+    data = ti.xcom_pull(task_ids=['get_data'])
     if not data:
         raise ValueError('No value currently stored in XComs')
 
@@ -60,6 +60,6 @@ load_data = PythonOperator(
     dag=dag
 )
 
-# -------------------- Set tasks -------------------- #
+# -------------------- Trigger tasks -------------------- #
 
 get_data >> load_data
