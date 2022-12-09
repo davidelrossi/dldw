@@ -24,7 +24,7 @@ teams_df = pd.DataFrame(data['teams'])
 
 # Connect to Data Lake
 host = "datalake1.clfypptwx2in.us-east-1.rds.amazonaws.com"
-database = "datalake1"
+database = "fpl_api"
 user = "danny"
 password = "1234567890"
 
