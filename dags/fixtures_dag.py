@@ -43,12 +43,14 @@ def get_players_ids():
 # 3. Get all fixtures info for all players
 
 def get_fixtures(ti):
-    # Get all fixtures info for all players
 
-    # get data returned from previous tasks'
-    ids_list = ti.xcom_pull(task_ids=['get_players_ids'])
-    if not ids_list:
+    # Get data returned from previous tasks'
+    data = ti.xcom_pull(task_ids=['get_players_ids'])
+    if not data:
         raise ValueError('No value currently stored in XComs')
+
+    # Get data from nested list
+    ids_list = data[0]
 
     # Empty dataframe
     fixtures_df = pd.DataFrame()
