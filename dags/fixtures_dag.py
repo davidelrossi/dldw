@@ -71,7 +71,7 @@ def get_fixtures(ti):
         if (counter % 50) == 0 or counter == len(ids_list):
             print(str(counter) + " players")
 
-    fixtures_list = fixtures_df.to_dict('records')
+    fixtures_list = [tuple(x) for x in fixtures_df.to_numpy()]
 
     return fixtures_list
 
