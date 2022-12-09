@@ -29,13 +29,13 @@ def get_data():
     return teams_df
 
 
-def load_data(ti):
-    # get data returned from previous task
-    data = ti.xcom_pull(task_ids=['get_data'])
-    if not data:
-        raise ValueError('No value currently stored in XComs')
+# def load_data(ti):
+#    # get data returned from previous task
+#    data = ti.xcom_pull(task_ids=['get_data'])
+#    if not data:
+#        raise ValueError('No value currently stored in XComs')
 
-    return data
+#    return data
 
 
 # Create DAG
@@ -54,17 +54,16 @@ dag = DAG('tea_dag',
 get_data = PythonOperator(
     task_id="get_data",
     python_callable=get_data,
-    do_xcom_push=True,
     dag=dag
 )
 
 # 2. Load data into database
-load_data = PythonOperator(
-    task_id="load_data",
-    python_callable=load_data,
-    dag=dag
-)
+# load_data = PythonOperator(
+#    task_id="load_data",
+#    python_callable=load_data,
+#    dag=dag
+# )
 
 # -------------------- Trigger tasks -------------------- #
 
-get_data >> load_data
+# get_data >> load_data
