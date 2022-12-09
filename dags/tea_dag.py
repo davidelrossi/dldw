@@ -1,3 +1,5 @@
+# -------------------- Libraries -------------------- #
+
 # Libraries for DAG
 import datetime
 from airflow import DAG
@@ -6,7 +8,8 @@ from airflow.operators.python_operator import PythonOperator
 # Libraries for FPL API
 import requests
 
-# Define the functions
+# -------------------- Functions -------------------- #
+
 
 # 1. Get data from URL
 
@@ -20,6 +23,16 @@ def get_data():
 
     return data
 
+
+def load_data(ti):
+    # get data returned from previous task
+    data = ti.xcom_pull(task_ids=['convert_to_json'])
+    if not data:
+        raise ValueError('No value currently stored in XComs')
+
+    return data
+
+
 # Create DAG
 default_args = {
     'owner': 'davide',
@@ -27,14 +40,26 @@ default_args = {
 }
 
 dag = DAG('tea_dag',
-          schedule_interval = '0 8 * * *',
-          catchup = False,
-          default_args = default_args)
+          schedule_interval='0 8 * * *',
+          catchup=False,
+          default_args=default_args)
 
-#  Set Tasks
+# -------------------- Set tasks -------------------- #
 # 1. Get data from URL
-get_teams_url = PythonOperator(
-    task_id = "get_data",
-    python_callable = get_data,
-    dag = dag
+get_data = PythonOperator(
+    task_id="get_data",
+    python_callable=get_data,
+    do_xcom_push=True,
+    dag=dag
 )
+
+# 2. Load data into database
+load_data = PythonOperator(
+    task_id="load_data",
+    python_callable=load_data,
+    dag=dag
+)
+
+# -------------------- Set tasks -------------------- #
+
+get_data >> load_data
