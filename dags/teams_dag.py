@@ -74,13 +74,14 @@ def finish_dag():
     logging.info('DAG HAS FINISHED,OBTAINED PL TEAMS INFORMATION')
 
 
-# Create DAG
+# -------------------- Create DAG -------------------- #
+
 default_args = {
     'owner': 'davide',
     'start_date': datetime.datetime(2022, 12, 10)
 }
 
-dag = DAG('tea_dag',
+dag = DAG('teams_dag',
           schedule_interval='0 8 * * *',
           catchup=False,
           default_args=default_args)
