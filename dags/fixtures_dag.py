@@ -21,9 +21,9 @@ def start_dag():
     logging.info('STARTING THE DAG, OBTAINING FIXTURES INFORMATION')
 
 
-# 2. Get data from URL
+# 2. Get players IDs
 
-def get_data():
+def get_players_ids():
     # API url
     url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
 
@@ -40,7 +40,68 @@ def get_data():
     return ids_list
 
 
-# 3. Log the end of the DAG
+# 3. Get all fixtures info for all players
+
+def get_fixtures(ti):
+    # Get all fixtures info for all players
+
+    # get data returned from previous tasks'
+    ids_list = ti.xcom_pull(task_ids=['get_players_ids'])
+    if not ids_list:
+        raise ValueError('No value currently stored in XComs')
+
+    # Empty dataframe
+    fixtures_df = pd.DataFrame()
+
+    # Progress counter
+    counter = 0
+
+    # Loop through the urls
+    for i in ids_list:
+        url_details = f'https://fantasy.premierleague.com/api/element-summary/{i}/'
+        r = requests.get(url_details).json()
+
+        df = pd.json_normalize(r['fixtures'])
+
+        fixtures_df = pd.concat([fixtures_df, df])
+
+        counter += 1
+        if (counter % 50) == 0 or counter == len(ids_list):
+            print(str(counter) + " players")
+
+    # Data Lake credentials
+    pg_hook = PostgresHook(
+        postgres_conn_id='postgres_db'
+    )
+
+    # Drop existing table
+    drop_table = "DROP TABLE IF EXISTS fixtures;"
+
+    # Create new table
+    create_table = "CREATE TABLE IF NOT EXISTS fixtures (id INT, code INT, team_h INT, team_h_score VARCHAR(255),\
+    team_a INT, team_a_score VARCHAR(255), event FLOAT, finished VARCHAR(255), minutes INT,\
+    provisional_start_time VARCHAR(255), kickoff_time VARCHAR(255), event_name VARCHAR(255), is_home VARCHAR(255),\
+    difficulty INT);"
+
+    # Connect to data lake
+    pg_conn = pg_hook.get_conn()
+    cursor = pg_conn.cursor()
+
+    # Execute SQL statements
+    cursor.execute(drop_table)
+    cursor.execute(create_table)
+
+    # Commit
+    pg_conn.commit()
+
+    # Create a list of tuples representing the rows in the dataframe
+    rows = [tuple(x) for x in fixtures_df.values]
+
+    # Insert the rows into the database
+    pg_hook.insert_rows(table="fixtures", rows=rows)
+
+
+# 4. Log the end of the DAG
 def finish_dag():
     logging.info('DAG HAS FINISHED,OBTAINED FIXTURES INFORMATION')
 
@@ -66,15 +127,22 @@ start_task = PythonOperator(
     dag=dag
 )
 
-# 2. Get data from URL
-get_data = PythonOperator(
-    task_id="get_data",
-    python_callable=get_data,
+# 2. Get players IDs
+get_players_ids = PythonOperator(
+    task_id="get_players_ids",
+    python_callable=get_players_ids,
     do_xcom_push=True,
     dag=dag
 )
 
-# 3. End Task
+# 3. Get fixtures
+get_fixtures = PythonOperator(
+    task_id="get_fixtures",
+    python_callable=get_fixtures,
+    dag=dag
+)
+
+# 4. End Task
 end_task = PythonOperator(
     task_id="end_task",
     python_callable=finish_dag,
@@ -83,4 +151,4 @@ end_task = PythonOperator(
 
 # -------------------- Triggering tasks -------------------- #
 
-start_task >> get_data >> end_task
+start_task >> get_players_ids >> get_fixtures >> end_task
