@@ -20,9 +20,13 @@ def get_data():
 
     response = requests.get(url)
 
+    # Convert the data in json format
     data = response.json()
 
-    return data
+    # Create DataFrame
+    teams_df = pd.DataFrame(data['teams'])
+
+    return teams_df
 
 
 def load_data(ti):
@@ -31,10 +35,7 @@ def load_data(ti):
     if not data:
         raise ValueError('No value currently stored in XComs')
 
-    # Create DataFrame
-    teams_df = pd.DataFrame(data['teams'])
-
-    return teams_df
+    return data
 
 
 # Create DAG
