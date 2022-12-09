@@ -71,36 +71,40 @@ def get_fixtures(ti):
         if (counter % 50) == 0 or counter == len(ids_list):
             print(str(counter) + " players")
 
-    # Data Lake credentials
-    pg_hook = PostgresHook(
-        postgres_conn_id='postgres_db'
-    )
+        return fixtures_df
 
-    # Drop existing table
-    drop_table = "DROP TABLE IF EXISTS fixtures;"
 
-    # Create new table
-    create_table = "CREATE TABLE IF NOT EXISTS fixtures (id INT, code INT, team_h INT, team_h_score VARCHAR(255),\
-    team_a INT, team_a_score VARCHAR(255), event FLOAT, finished VARCHAR(255), minutes INT,\
-    provisional_start_time VARCHAR(255), kickoff_time VARCHAR(255), event_name VARCHAR(255), is_home VARCHAR(255),\
-    difficulty INT);"
 
-    # Connect to data lake
-    pg_conn = pg_hook.get_conn()
-    cursor = pg_conn.cursor()
-
-    # Execute SQL statements
-    cursor.execute(drop_table)
-    cursor.execute(create_table)
-
-    # Commit
-    pg_conn.commit()
-
-    # Create a list of tuples representing the rows in the dataframe
-    rows = [tuple(x) for x in fixtures_df.values]
-
-    # Insert the rows into the database
-    pg_hook.insert_rows(table="fixtures", rows=rows)
+    # # Data Lake credentials
+    # pg_hook = PostgresHook(
+    #     postgres_conn_id='postgres_db'
+    # )
+    #
+    # # Drop existing table
+    # drop_table = "DROP TABLE IF EXISTS fixtures;"
+    #
+    # # Create new table
+    # create_table = "CREATE TABLE IF NOT EXISTS fixtures (id INT, code INT, team_h INT, team_h_score VARCHAR(255),\
+    # team_a INT, team_a_score VARCHAR(255), event FLOAT, finished VARCHAR(255), minutes INT,\
+    # provisional_start_time VARCHAR(255), kickoff_time VARCHAR(255), event_name VARCHAR(255), is_home VARCHAR(255),\
+    # difficulty INT);"
+    #
+    # # Connect to data lake
+    # pg_conn = pg_hook.get_conn()
+    # cursor = pg_conn.cursor()
+    #
+    # # Execute SQL statements
+    # cursor.execute(drop_table)
+    # cursor.execute(create_table)
+    #
+    # # Commit
+    # pg_conn.commit()
+    #
+    # # Create a list of tuples representing the rows in the dataframe
+    # rows = [tuple(x) for x in fixtures_df.values]
+    #
+    # # Insert the rows into the database
+    # pg_hook.insert_rows(table="fixtures", rows=rows)
 
 
 # 4. Log the end of the DAG
