@@ -34,9 +34,9 @@ def get_data():
         postgres_conn_id='postgres_db'
     )
 
-    drop_table = "DROP TABLE IF EXISTS Teams;"
+    drop_table = "DROP TABLE IF EXISTS teams;"
 
-    create_table = "CREATE TABLE IF NOT EXISTS Teams (code INT, draw INT, form VARCHAR(255),\
+    create_table = "CREATE TABLE IF NOT EXISTS teams (code INT, draw INT, form VARCHAR(255),\
             id INT, loss INT, name VARCHAR(255),\
             played INT, points INT, position INT, short_name VARCHAR(255), strength INT, team_division VARCHAR(255),\
             unavailable VARCHAR(255), win INT, strength_overall_home INT, strength_overall_away INT,\
@@ -56,7 +56,7 @@ def get_data():
     rows = [tuple(x) for x in teams_df.values]
 
     # Insert the rows into the database
-    pg_hook.insert_rows(table="Teams", rows=rows)
+    pg_hook.insert_rows(table="teams", rows=rows)
 
     pg_conn.commit()
 
