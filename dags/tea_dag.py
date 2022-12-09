@@ -10,13 +10,15 @@ import requests
 
 # 1. Get data from URL
 
-def get_teams_url():
+def get_data():
     # API URL
     url = 'https://fantasy.premierleague.com/api/bootstrap-static/'
 
     response = requests.get(url)
 
-    return response
+    data = response.json()
+
+    return data
 
 # Create DAG
 default_args = {
@@ -32,7 +34,7 @@ dag = DAG('tea_dag',
 #  Set Tasks
 # 1. Get data from URL
 get_teams_url = PythonOperator(
-    task_id = "get_teams_url",
-    python_callable = get_teams_url,
+    task_id = "get_data",
+    python_callable = get_data,
     dag = dag
 )
