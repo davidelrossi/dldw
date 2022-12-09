@@ -78,7 +78,7 @@ def finish_dag():
 
 default_args = {
     'owner': 'davide',
-    'start_date': datetime.datetime(2022, 12, 10)
+    'start_date': datetime.datetime(2022, 12, 9)
 }
 
 dag = DAG('teams_dag',
