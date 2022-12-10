@@ -40,9 +40,9 @@ def get_players_ids():
     return ids_list
 
 
-# 3. Get all past gameweeks info for all players
+# 3. Get all past seasons info for all players
 
-def get_gameweeks(ti):
+def get_seasons(ti):
 
     # Get data returned from previous tasks'
     data = ti.xcom_pull(task_ids=['get_players_ids'])
@@ -53,49 +53,48 @@ def get_gameweeks(ti):
     ids_list = data[0]
 
     # Empty dataframe
-    gameweeks_df = pd.DataFrame()
+    past_seasons_df = pd.DataFrame()
 
     # Progress counter
     counter = 0
 
-    # Loop through the urls
     for i in ids_list:
         url_details = f'https://fantasy.premierleague.com/api/element-summary/{i}/'
         r = requests.get(url_details).json()
 
-        df = pd.json_normalize(r['history'])
+        df = pd.json_normalize(r['history_past'])
 
-        gameweeks_df = pd.concat([gameweeks_df, df])
+        past_seasons_df = pd.concat([past_seasons_df, df])
 
         counter += 1
         if (counter % 50) == 0 or counter == len(ids_list):
             print(str(counter) + " players")
 
     # Change data types
-    gameweeks_df['influence'] = gameweeks_df['influence'].astype('float')
-    gameweeks_df['creativity'] = gameweeks_df['creativity'].astype('float')
-    gameweeks_df['threat'] = gameweeks_df['threat'].astype('float')
-    gameweeks_df['ict_index'] = gameweeks_df['ict_index'].astype('float')
-    gameweeks_df['expected_goals'] = gameweeks_df['expected_goals'].astype('float')
-    gameweeks_df['expected_assists'] = gameweeks_df['expected_assists'].astype('float')
-    gameweeks_df['expected_goal_involvements'] = gameweeks_df['expected_goal_involvements'].astype('float')
-    gameweeks_df['expected_goals_conceded'] = gameweeks_df['expected_goals_conceded'].astype('float')
+    past_seasons_df['influence'] = past_seasons_df['influence'].astype('float')
+    past_seasons_df['creativity'] = past_seasons_df['creativity'].astype('float')
+    past_seasons_df['threat'] = past_seasons_df['threat'].astype('float')
+    past_seasons_df['ict_index'] = past_seasons_df['ict_index'].astype('float')
+    past_seasons_df['expected_goals'] = past_seasons_df['expected_goals'].astype('float')
+    past_seasons_df['expected_assists'] = past_seasons_df['expected_assists'].astype('float')
+    past_seasons_df['expected_goal_involvements'] = past_seasons_df['expected_goal_involvements'].astype('float')
+    past_seasons_df['expected_goals_conceded'] = past_seasons_df['expected_goals_conceded'].astype('float')
 
-    gameweeks_list = [tuple(x) for x in gameweeks_df.to_numpy()]
+    past_seasons_list = [tuple(x) for x in past_seasons_df.to_numpy()]
 
-    return gameweeks_list
+    return past_seasons_list
 
 
-# 4. Load past gameweeks data into database
-def load_gameweeks(ti):
+# 4. Load past seasons data into database
+def load_seasons(ti):
 
     # Get data returned from previous tasks'
-    data = ti.xcom_pull(task_ids=['get_gameweeks'])
+    data = ti.xcom_pull(task_ids=['get_seasons'])
     if not data:
         raise ValueError('No value currently stored in XComs')
 
     # Get data from nested list
-    gameweeks_data = data[0]
+    seasons_data = data[0]
 
     # Data Lake credentials
     pg_hook = PostgresHook(
@@ -103,16 +102,15 @@ def load_gameweeks(ti):
     )
 
     # Drop existing table
-    drop_table = "DROP TABLE IF EXISTS gameweeks;"
+    drop_table = "DROP TABLE IF EXISTS past_seasons;"
 
     # Create new table
-    create_table = "CREATE TABLE IF NOT EXISTS gameweeks (element INT, fixture INT, opponent_team INT, total_points INT,\
-    was_home VARCHAR(255), kickoff_time VARCHAR(255), team_h_score INT, team_a_score INT, round INT, minutes INT,\
-    goals_scored INT, assists INT, clean_sheets INT, goals_conceded INT, own_goals INT, penalties_saved INT,\
-    penalties_missed INT, yellow_cards INT, red_cards INT, saves INT, bonus INT, bps INT, influence FLOAT,\
-    creativity FLOAT, threat FLOAT, ict_index FLOAT, starts INT, expected_goals FLOAT, expected_assists FLOAT,\
-    expected_goal_involvements FLOAT, expected_goals_conceded FLOAT, value INT, transfers_balance INT, selected INT,\
-    transfers_in INT, transfers_out INT);"
+    create_table = "CREATE TABLE IF NOT EXISTS past_seasons (season_name VARCHAR(255), element_code INT, start_cost INT,\
+            end_cost INT, total_points INT, minutes INT, goals_scored INT, assists INT, clean_sheets INT,\
+            goals_conceded INT, own_goals INT, penalties_saved INT, penalties_missed INT, yellow_cards INT,\
+            red_cards INT, saves INT, bonus INT, bps INT, influence FLOAT, creativity FLOAT, threat FLOAT,\
+            ict_index FLOAT, starts INT, expected_goals FLOAT,expected_assists FLOAT, expected_goal_involvements FLOAT,\
+            expected_goals_conceded FLOAT);"
 
     # Connect to data lake
     pg_conn = pg_hook.get_conn()
@@ -126,7 +124,7 @@ def load_gameweeks(ti):
     pg_conn.commit()
 
     # Insert the rows into the database
-    pg_hook.insert_rows(table="gameweeks", rows=gameweeks_data)
+    pg_hook.insert_rows(table="past_seasons", rows=seasons_data)
 
 
 # 5. Log the end of the DAG
@@ -141,7 +139,7 @@ default_args = {
     'start_date': datetime.datetime(2022, 12, 9)
 }
 
-dag = DAG('gameweek_dag',
+dag = DAG('seasons_dag',
           schedule_interval='0 8 * * *',
           catchup=False,
           default_args=default_args)
@@ -164,17 +162,17 @@ get_players_ids = PythonOperator(
 )
 
 # 3. Get fixtures
-get_gameweeks = PythonOperator(
-    task_id="get_gameweeks",
-    python_callable=get_gameweeks,
+get_seasons = PythonOperator(
+    task_id="get_seasons",
+    python_callable=get_seasons,
     do_xcom_push=True,
     dag=dag
 )
 
 # 3. Load data
-load_gameweeks = PythonOperator(
-    task_id="load_gameweeks",
-    python_callable=load_gameweeks,
+load_seasons = PythonOperator(
+    task_id="load_seasons",
+    python_callable=load_seasons,
     dag=dag
 )
 
@@ -187,4 +185,4 @@ end_task = PythonOperator(
 
 # -------------------- Triggering tasks -------------------- #
 
-start_task >> get_players_ids >> get_gameweeks >> load_gameweeks >> end_task
+start_task >> get_players_ids >> get_seasons >> load_seasons >> end_task
