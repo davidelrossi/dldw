@@ -141,7 +141,7 @@ default_args = {
     'start_date': datetime.datetime(2022, 12, 9)
 }
 
-dag = DAG('fixtures_dag',
+dag = DAG('gameweek_dag',
           schedule_interval='0 8 * * *',
           catchup=False,
           default_args=default_args)
