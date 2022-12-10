@@ -82,7 +82,7 @@ default_args = {
 }
 
 dag = DAG('teams_dag',
-          schedule_interval='0 8 * * *',
+          schedule_interval='0 6 * * *',
           catchup=False,
           default_args=default_args)
 

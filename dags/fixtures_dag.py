@@ -129,7 +129,7 @@ default_args = {
 }
 
 dag = DAG('fixtures_dag',
-          schedule_interval='0 8 * * *',
+          schedule_interval='0 12 * * *',
           catchup=False,
           default_args=default_args)
 
@@ -158,7 +158,7 @@ get_fixtures = PythonOperator(
     dag=dag
 )
 
-# 3. Load data
+# 4. Load data
 load_fixtures = PythonOperator(
     task_id="load_fixtures",
     python_callable=load_fixtures,

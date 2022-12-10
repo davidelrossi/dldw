@@ -140,7 +140,7 @@ default_args = {
 }
 
 dag = DAG('seasons_dag',
-          schedule_interval='0 8 * * *',
+          schedule_interval='0 11 * * *',
           catchup=False,
           default_args=default_args)
 
@@ -169,7 +169,7 @@ get_seasons = PythonOperator(
     dag=dag
 )
 
-# 3. Load data
+# 4. Load data
 load_seasons = PythonOperator(
     task_id="load_seasons",
     python_callable=load_seasons,

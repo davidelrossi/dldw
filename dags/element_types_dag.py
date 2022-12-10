@@ -79,7 +79,7 @@ default_args = {
 }
 
 dag = DAG('element_type_dag',
-          schedule_interval='0 8 * * *',
+          schedule_interval='0 5 * * *',
           catchup=False,
           default_args=default_args)
 

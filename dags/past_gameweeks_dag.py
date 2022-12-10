@@ -142,7 +142,7 @@ default_args = {
 }
 
 dag = DAG('gameweek_dag',
-          schedule_interval='0 8 * * *',
+          schedule_interval='0 7 * * *',
           catchup=False,
           default_args=default_args)
 
@@ -171,7 +171,7 @@ get_gameweeks = PythonOperator(
     dag=dag
 )
 
-# 3. Load data
+# 4. Load data
 load_gameweeks = PythonOperator(
     task_id="load_gameweeks",
     python_callable=load_gameweeks,
