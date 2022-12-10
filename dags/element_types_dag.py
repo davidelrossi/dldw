@@ -13,7 +13,7 @@ import pandas as pd
 # Connecting to the Data Lake
 from airflow.hooks.postgres_hook import PostgresHook
 
-# -------------------- Functions -------------------- #
+# -------------------- functions -------------------- #
 
 
 # 1. Log the start of the DAG

@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 # Connecting to the Data Lake
 from airflow.hooks.postgres_hook import PostgresHook
 
-# ----------------------------- Define Functions -----------------------------
+# ----------------------------- Define functions -----------------------------
 
 # 1. Log the start of the DAG
 def start_DAG():
