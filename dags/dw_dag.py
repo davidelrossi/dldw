@@ -370,7 +370,7 @@ def finish_dag():
 
 default_args = {
     'owner': 'davide',
-    'start_date': datetime.datetime(2023, 1, 4)
+    'start_date': datetime.datetime(2023, 1, 3)
 }
 
 dag = DAG('datawarehouse_dag',
