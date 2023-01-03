@@ -86,7 +86,7 @@ def el_stg_table():
     cur_1 = conn_1.cursor()
 
     # SQL Statement: Get data from elements table
-    sql_get_el = "SELECT id, first_name, second_name, web_name, team, code FROM elements;"
+    sql_get_el = "SELECT id, first_name, second_name, web_name, team, code, element_type FROM elements;"
 
     cur_1.execute(sql_get_el)
     tuples_el = cur_1.fetchall()
@@ -105,7 +105,7 @@ def el_stg_table():
 
     # SQL Statement: Create staging table
     sql_create_el_table = "CREATE TABLE IF NOT EXISTS stage_elements (id VARCHAR(255), first_name VARCHAR(255),\
-        second_name VARCHAR(255), web_name VARCHAR(255), team INT, code INT);"
+        second_name VARCHAR(255), web_name VARCHAR(255), team INT, code INT, element_type INT);"
 
     # Create and insert data into data warehouse staging table
     cur_2.execute(sql_drop)
