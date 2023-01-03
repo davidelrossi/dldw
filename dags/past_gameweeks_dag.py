@@ -81,6 +81,11 @@ def get_gameweeks(ti):
     gameweeks_df['expected_goal_involvements'] = gameweeks_df['expected_goal_involvements'].astype('float')
     gameweeks_df['expected_goals_conceded'] = gameweeks_df['expected_goals_conceded'].astype('float')
 
+    # Fill NaN with 0. NaNs occur during a gameday when the matches have not yet been played.
+    gameweeks_df['team_h_score'] = gameweeks_df['team_h_score'].fillna(0)
+    gameweeks_df['team_a_score'] = gameweeks_df['team_a_score'].fillna(0)
+
+    # Create list with all data to be passed in the next stage
     gameweeks_list = [tuple(x) for x in gameweeks_df.to_numpy()]
 
     return gameweeks_list

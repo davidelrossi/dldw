@@ -53,9 +53,13 @@ gameweeks_df['expected_assists'] = gameweeks_df['expected_assists'].astype('floa
 gameweeks_df['expected_goal_involvements'] = gameweeks_df['expected_goal_involvements'].astype('float')
 gameweeks_df['expected_goals_conceded'] = gameweeks_df['expected_goals_conceded'].astype('float')
 
+# Fill NaN with 0. NaNs occur during a gameday when the matches have not yet been played.
+gameweeks_df['team_h_score'] = gameweeks_df['team_h_score'].fillna(0)
+gameweeks_df['team_a_score'] = gameweeks_df['team_a_score'].fillna(0)
+
 # Connect to Data Lake
 host = "datalake1.clfypptwx2in.us-east-1.rds.amazonaws.com"
-database = "datalake1"
+database = "fpl_api"
 user = "danny"
 password = "1234567890"
 

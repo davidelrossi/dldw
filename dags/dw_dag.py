@@ -9,6 +9,7 @@ from airflow.operators.python_operator import PythonOperator
 # Libraries for FPL API
 import requests
 import pandas as pd
+import numpy as np
 
 # Connecting to the Data Lake
 from airflow.hooks.postgres_hook import PostgresHook
@@ -210,7 +211,6 @@ def transform_data():
     conn_2 = pg_hook_2.get_conn()
     cur_2 = conn_2.cursor()
 
-
     # Get gameweeks data
     sql_select_gw = "SELECT * FROM stage_gameweeks;"
     cur_2.execute(sql_select_gw)
@@ -256,7 +256,27 @@ def transform_data():
     df_el['id'] = df_el['id'].astype(int)
 
     # Merge gameweek dataframe with elements dataframe on "id"
-    df = df.merge(df_2, left_on='element', right_on='id', how='left')
+    df_gw = df_gw.merge(df_el, left_on='element', right_on='id', how='left')
+
+    # Set dict for team mapping
+    dict = df_tm.set_index('id')['name'].to_dict()
+
+    # Change team ID with team name
+    df_gw["team"] = df_gw["team"].map(dict)
+    df_gw["opponent_team"] = df_gw["opponent_team"].map(dict)
+
+    # Drop element column (duplicate)
+    df_gw = df_gw.drop('element', axis=1)
+
+    # Rearrange columns order for better visualisation
+    first_cols = ['id', 'first_name', 'second_name', 'web_name', 'code', 'fixture', 'team', 'opponent_team']
+    last_cols = [col for col in df_gw.columns if col not in first_cols]
+    df_gw = df_gw[first_cols + last_cols]
+
+    # Get fixtures with extended name
+    df_gw['fixture'] = np.where(df_gw['was_home'] == 'true', df_gw['team'] + '-' + df_gw['opponent_team'],
+                                df_gw['opponent_team'] + '-' + df_gw['team'])
+
 
 
 
