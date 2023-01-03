@@ -374,7 +374,7 @@ default_args = {
 }
 
 dag = DAG('datawarehouse_dag',
-          schedule_interval='13 * * *',
+          schedule_interval='0 13 * * *',
           catchup=False,
           default_args=default_args)
 
