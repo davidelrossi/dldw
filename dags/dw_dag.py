@@ -373,7 +373,7 @@ default_args = {
     'start_date': datetime.datetime(2023, 1, 4)
 }
 
-dag = DAG('gameweek_dag',
+dag = DAG('datawarehouse_dag',
           schedule_interval='13 * * *',
           catchup=False,
           default_args=default_args)
