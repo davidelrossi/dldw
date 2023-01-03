@@ -204,7 +204,7 @@ def transform_data():
 
     # Data Warehouse credentials
     pg_hook_2 = PostgresHook(
-        postgres_conn_id='dw_stage'
+        postgres_conn_id='datawarehouse'
     )
 
     # Connect to Data Warehouse
