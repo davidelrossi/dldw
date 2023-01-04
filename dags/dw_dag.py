@@ -272,7 +272,7 @@ def transform_data():
     dict_tm = df_tm.set_index('id')['name'].to_dict()
 
     # Change team ID with team name
-    df_gw["team"] = df_gw["team"].map(dict)
+    df_gw["team"] = df_gw["team"].map(dict_tm)
     df_gw["opponent_team"] = df_gw["opponent_team"].map(dict_tm)
 
     # Drop element column (duplicate)
