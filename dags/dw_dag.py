@@ -147,13 +147,13 @@ def et_stg_table():
     sql_drop = "DROP TABLE IF EXISTS stage_element_types"
 
     # SQL Statement: Create staging table
-    sql_create_et_table = "CREATE TABLE IF NOT EXISTS stage_elements_types (id INT, singular_name VARCHAR(255));"
+    sql_create_et_table = "CREATE TABLE IF NOT EXISTS stage_element_types (id INT, singular_name VARCHAR(255));"
 
     # Create and insert data into data warehouse staging table
     cur_2.execute(sql_drop)
     cur_2.execute(sql_create_et_table)
     for row in tuples_et:
-        cur_2.execute('INSERT INTO stage_elements_types VALUES %s', (row,))
+        cur_2.execute('INSERT INTO stage_element_types VALUES %s', (row,))
     conn_2.commit()
 
 
