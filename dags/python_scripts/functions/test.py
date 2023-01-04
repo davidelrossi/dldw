@@ -16,4 +16,3 @@ def get_data():
     return teams_df
 
 get_data()
-
